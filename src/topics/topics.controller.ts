@@ -1,4 +1,3 @@
-// topics.controller.ts
 import {
   Controller,
   Post,
@@ -8,18 +7,36 @@ import {
   Delete,
   Body,
   Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { TopicsService } from './topics.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
 
 @Controller('topics')
 export class TopicsController {
-  constructor(private readonly topicsService: TopicsService) {}
+  constructor(
+    private readonly topicsService: TopicsService,
+    private readonly usersService: UsersService,
+  ) {}
 
-  @Post()
-  async createTopic(@Body() createTopicDto: CreateTopicDto) {
-    return this.topicsService.createTopic(createTopicDto);
+  @Post(':userId')
+  async createTopic(
+    @Param('userId') userId: number,
+    @Body() createTopicDto: CreateTopicDto,
+  ) {
+    try {
+      const user = await this.usersService.getUser(userId);
+      if (!(user instanceof User)) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return this.topicsService.createTopic(user, createTopicDto);
+    } catch (error) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
   }
 
   @Put(':id')

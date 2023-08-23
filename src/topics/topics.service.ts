@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Topic } from './entities/topic.entity';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+import { User } from '../users/entities/user.entity'; // Asegúrate de la ruta correcta
 
 @Injectable()
 export class TopicsService {
@@ -12,8 +13,8 @@ export class TopicsService {
     @InjectRepository(Topic) private topicRepository: Repository<Topic>,
   ) {}
 
-  async createTopic(topicDto: CreateTopicDto) {
-    const newTopic = this.topicRepository.create(topicDto);
+  async createTopic(user: User, topicDto: CreateTopicDto) {
+    const newTopic = this.topicRepository.create({ ...topicDto, user });
     return this.topicRepository.save(newTopic);
   }
 
@@ -58,11 +59,7 @@ export class TopicsService {
   }
 
   async getTopicByValue(value: number) {
-    const topic = await this.topicRepository.findOne({
-      where: {
-        value,
-      },
-    });
+    const topic = await this.topicRepository.findOne({ where: { value } });
     if (!topic) {
       throw new HttpException('Topic not found', HttpStatus.NOT_FOUND);
     }

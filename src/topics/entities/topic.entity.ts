@@ -1,5 +1,6 @@
 // topic.entity.ts
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Topic {
@@ -14,4 +15,6 @@ export class Topic {
 
   @Column()
   value: number;
+  @ManyToOne(() => User, (user) => user.topics)
+  user: User;
 }
