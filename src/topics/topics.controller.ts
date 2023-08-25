@@ -9,19 +9,26 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  OnModuleDestroy,
 } from '@nestjs/common';
 import { TopicsService } from './topics.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
+import { MqttSubscribeService } from '../mqtt-subscribe/mqtt-subscribe.service';
 
 @Controller('topics')
-export class TopicsController {
+export class TopicsController implements OnModuleDestroy {
   constructor(
     private readonly topicsService: TopicsService,
     private readonly usersService: UsersService,
+    private readonly mqttSubscribeService: MqttSubscribeService,
   ) {}
+
+  async onModuleDestroy() {
+    this.mqttSubscribeService.close();
+  }
 
   @Post(':userId')
   async createTopic(
@@ -33,7 +40,11 @@ export class TopicsController {
       if (!(user instanceof User)) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
-      return this.topicsService.createTopic(user, createTopicDto);
+      const topic = await this.topicsService.createTopic(user, createTopicDto);
+
+      this.mqttSubscribeService.subscribe(topic.topicName);
+
+      return topic;
     } catch (error) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }

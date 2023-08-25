@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { DevicesModule } from './devices/devices.module';
 import { TopicsModule } from './topics/topics.module';
+import { MqttSubscribeService } from './mqtt-subscribe/mqtt-subscribe.service';
+import { MqttPublishService } from './mqtt-publish/mqtt-publish.service';
 
 @Module({
   imports: [
@@ -21,6 +23,6 @@ import { TopicsModule } from './topics/topics.module';
     TopicsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [MqttSubscribeService, MqttPublishService],
 })
 export class AppModule {}

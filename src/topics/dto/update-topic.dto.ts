@@ -2,5 +2,5 @@
 export class UpdateTopicDto {
   topicName?: string;
   description?: string;
-  value?: number; // Agrega esta línea si no la tienes
+  value?: number;
 }
